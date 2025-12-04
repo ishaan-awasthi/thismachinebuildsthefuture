@@ -49,7 +49,7 @@ export default function ManifestoPage() {
           </div>
 
           {/* Citations */}
-          <div className="mt-12 pt-8 border-t border-border">
+          <div className="mt-12 pt-8" style={{ borderTop: '1px solid #00F0FF' }}>
             <div className="text-secondary-text" style={{ fontSize: '12px', lineHeight: '1.8' }}>
               <p className="mb-3">
                 Bender, Emily, et al. "On the Dangers of Stochastic Parrots: Can Language Models Be Too Big?" <em>Proceedings of the 2021 ACM Conference on Fairness, Accountability, and Transparency</em>, 1 Mar. 2021, pp. 610–623, https://doi.org/10.1145/3442188.3445922.

@@ -97,7 +97,7 @@ export default function TimelinePage() {
   }
 
   return (
-    <div className="min-h-screen bg-base-bg flex flex-col">
+    <div className="min-h-screen bg-base-bg flex flex-col overflow-x-hidden">
       {/* Fixed header */}
       <header className="fixed top-0 left-0 right-0 h-20 flex items-center justify-between px-5 md:px-10 z-10 border-b border-border" style={{ backgroundColor: '#0A0A0A' }}>
         <h1 className="text-headline text-2xl md:text-3xl text-base-text">
@@ -129,7 +129,7 @@ export default function TimelinePage() {
             <p className="text-secondary-text">no submissions yet.</p>
           </div>
         ) : (
-          <div className="relative w-full py-10">
+          <div className="relative w-full py-10 pb-20">
             {/* Vertical cyan timeline line - centered on desktop, 40px from left on mobile */}
             <div 
               className="absolute top-0 bottom-0 left-[40px] md:left-1/2 md:-translate-x-1/2"
@@ -161,10 +161,11 @@ export default function TimelinePage() {
                         : `translateX(${isLeft ? '-20px' : '20px'}) rotate(${rotation}deg)`,
                     }}
                   >
-                    {/* Cyan dot connecting to timeline */}
+                    {/* Cyan dot connecting to timeline - hidden */}
                     <div
                       className="absolute rounded-full bg-cyan transition-all duration-200 md:left-1/2 md:-translate-x-1/2"
                       style={{
+                        display: 'none',
                         left: '32px',
                         top: '20px',
                         width: '8px',

@@ -195,8 +195,8 @@ export default function ChatPage() {
                     borderLeft: `3px solid ${msg.role === 'user' ? '#00F0FF' : '#808080'}`,
                   }}
                 >
-                  <span className="text-cyan mr-2">
-                    {msg.role === 'user' ? '>' : '>>'}
+                  <span className="mr-2" style={{ color: msg.role === 'user' ? '#00F0FF' : '#808080' }}>
+                    {msg.role === 'user' ? '>>' : '>>'}
                   </span>
                   <span className="text-base-text" style={{ fontSize: '16px', lineHeight: '1.6' }}>
                     {msg.content}
@@ -213,7 +213,7 @@ export default function ChatPage() {
                     borderLeft: '3px solid #808080',
                   }}
                 >
-                  <span className="text-cyan mr-2">&gt;&gt;</span>
+                  <span className="mr-2" style={{ color: '#808080' }}>&gt;&gt;</span>
                   <span className="text-base-text" style={{ fontSize: '16px' }}>
                     {getEllipsis()}
                   </span>
@@ -236,8 +236,9 @@ export default function ChatPage() {
               onInput={handleInputChange}
               onKeyDown={handleKeyDown}
               onPaste={handlePaste}
-              className="w-full border-2 border-cyan bg-base-bg p-4 focus:outline-none focus:glow-cyan-strong transition-all duration-150 min-h-[80px] cursor-text"
+              className="w-full border-2 bg-base-bg p-4 focus:outline-none transition-all duration-150 min-h-[80px] cursor-text"
               style={{ 
+                borderColor: '#E8E8E8',
                 color: '#E8E8E8',
                 fontSize: '16px',
                 lineHeight: '1.6',
@@ -245,6 +246,12 @@ export default function ChatPage() {
                 whiteSpace: 'pre-wrap',
                 wordWrap: 'break-word',
                 overflowWrap: 'break-word'
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.boxShadow = '0 0 16px rgba(0, 240, 255, 0.8)'
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.boxShadow = 'none'
               }}
               data-placeholder={placeholderText}
             />

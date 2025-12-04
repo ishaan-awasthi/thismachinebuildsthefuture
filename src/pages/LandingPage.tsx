@@ -25,7 +25,6 @@ export default function LandingPage() {
   const [targetContributions, setTargetContributions] = useState(0)
   const [inputValue, setInputValue] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [hasGlitched, setHasGlitched] = useState(false)
   const [cursorVisible, setCursorVisible] = useState(true)
   const [placeholderText] = useState(() => sampleTexts[Math.floor(Math.random() * sampleTexts.length)])
   const navigate = useNavigate()
@@ -66,13 +65,6 @@ export default function LandingPage() {
       }
     }
 
-    // Random glitch effect (5% chance)
-    if (Math.random() < 0.05 && !hasGlitched) {
-      setTimeout(() => {
-        setHasGlitched(true)
-        setTimeout(() => setHasGlitched(false), 100)
-      }, 1000)
-    }
   }, [])
 
   // Load contributions count on mount
@@ -254,7 +246,7 @@ export default function LandingPage() {
           {/* Title - single line, smaller, reserve height */}
           <div className="text-center mb-8" style={{ minHeight: '80px' }}>
             <h1 
-              className={`text-headline text-2xl md:text-3xl lg:text-4xl text-base-text whitespace-nowrap ${hasGlitched ? 'animate-glitch' : ''}`}
+              className="text-headline text-2xl md:text-3xl lg:text-4xl text-base-text whitespace-nowrap"
               style={{ letterSpacing: '0.05em' }}
             >
               {typedTitle}
@@ -270,7 +262,7 @@ export default function LandingPage() {
           {/* Subtitle - left aligned with chevron, reserve space */}
           <div className="mb-6" style={{ minHeight: '30px' }}>
             {typedSubtitle && (
-              <p className="text-secondary-text flex items-start gap-2 animate-fade-in" style={{ fontSize: '16px' }}>
+              <p className="text-base-text flex items-start gap-2 animate-fade-in" style={{ fontSize: '16px' }}>
                 <span className="text-cyan">&gt;&gt;</span>
                 <span>{typedSubtitle}</span>
               </p>
@@ -296,7 +288,7 @@ export default function LandingPage() {
                           <span className="text-cyan">&gt;&gt;</span>
                           <span>
                             {before}
-                            <span className="text-cyan uppercase">{ai}</span>
+                            <span className="text-base-text uppercase">{ai}</span>
                             {after}
                           </span>
                         </span>
@@ -330,8 +322,9 @@ export default function LandingPage() {
                     onInput={handleInputChange}
                     onKeyDown={handleKeyDown}
                     onPaste={handlePaste}
-                    className="w-full border-2 border-cyan bg-base-bg p-4 focus:outline-none focus:glow-cyan-strong transition-all duration-150 min-h-[100px] cursor-text"
+                    className="w-full border-2 bg-base-bg p-4 focus:outline-none transition-all duration-150 min-h-[100px] cursor-text"
                     style={{ 
+                      borderColor: '#E8E8E8',
                       color: '#E8E8E8',
                       fontSize: '16px',
                       lineHeight: '1.6',
@@ -339,6 +332,12 @@ export default function LandingPage() {
                       whiteSpace: 'pre-wrap',
                       wordWrap: 'break-word',
                       overflowWrap: 'break-word'
+                    }}
+                    onFocus={(e) => {
+                      e.currentTarget.style.boxShadow = '0 0 16px rgba(0, 240, 255, 0.8)'
+                    }}
+                    onBlur={(e) => {
+                      e.currentTarget.style.boxShadow = 'none'
                     }}
                     data-placeholder={placeholderText}
                   />
@@ -377,7 +376,7 @@ export default function LandingPage() {
                     }
                   }}
                 >
-                  {isSubmitting ? '>> processing...' : '>> submit & enter'}
+                  {isSubmitting ? '>> processing...' : '>> submit and continue'}
                 </button>
               </div>
             )}
