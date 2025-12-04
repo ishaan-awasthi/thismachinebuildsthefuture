@@ -1,25 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { processSubmission, getSystemPrompts } from '../lib/api'
 
-const CornerDownRightIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="h-4 w-4"
-    aria-hidden="true"
-  >
-    <polyline points="15 10 20 15 15 20" />
-    <path d="M4 4v7a4 4 0 0 0 4 4h12" />
-  </svg>
-)
+const fullTitle = 'THIS MACHINE BUILDS THE FUTURE'
+const subtitleText = "but it needs your help."
+const questionLines = [
+  "artificial intelligence is here to stay, and we're already using it to build the present.",
+  "but how should we use it to build the future?",
+  "how do you think ai ought to behave?"
+]
 
 const sampleTexts = [
   'i think ai should be concise and clear... it should always limit its responses to 2 sentences max.',
@@ -28,49 +17,171 @@ const sampleTexts = [
 ]
 
 export default function LandingPage() {
-  const [showTitle, setShowTitle] = useState(false)
-  const [showLines, setShowLines] = useState(false)
-  const [visibleLines, setVisibleLines] = useState(0)
-  const [contributions, setContributions] = useState(1247)
+  const [typedTitle, setTypedTitle] = useState('')
+  const [typedSubtitle, setTypedSubtitle] = useState('')
+  const [typedQuestionLines, setTypedQuestionLines] = useState<string[]>(['', '', ''])
+  const [showInput, setShowInput] = useState(false)
+  const [displayContributions, setDisplayContributions] = useState(0)
+  const [targetContributions, setTargetContributions] = useState(0)
   const [inputValue, setInputValue] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [hasGlitched, setHasGlitched] = useState(false)
+  const [cursorVisible, setCursorVisible] = useState(true)
   const [placeholderText] = useState(() => sampleTexts[Math.floor(Math.random() * sampleTexts.length)])
   const navigate = useNavigate()
+  const inputRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const titleTimer = setTimeout(() => {
-      setShowTitle(true)
-    }, 1000) // Delay before title appears
+    // Letter-by-letter typing animation for title
+    let currentChar = 0
+    let cursorInterval: NodeJS.Timeout | null = null
     
-    // After 2 seconds, start showing lines one by one
-    const timer = setTimeout(() => {
-      setShowLines(true)
-      const lineInterval = setInterval(() => {
-        setVisibleLines((prev) => {
-          if (prev >= 4) {
-            clearInterval(lineInterval)
-            return prev
-          }
-          return prev + 1
-        })
-      }, 800) // Slower line-by-line appearance
-      
-      return () => clearInterval(lineInterval)
-    }, 2500)
-
-    // Load contributions count
-    loadContributionsCount()
-
+    // Cursor blink animation
+    cursorInterval = setInterval(() => {
+      setCursorVisible(prev => !prev)
+    }, 530)
+    
+    const typingInterval = setInterval(() => {
+      if (currentChar < fullTitle.length) {
+        setTypedTitle(fullTitle.substring(0, currentChar + 1))
+        currentChar++
+      } else {
+        clearInterval(typingInterval)
+        // Stop cursor blinking and hide after delay
+        if (cursorInterval) {
+          clearInterval(cursorInterval)
+        }
+        setTimeout(() => {
+          setCursorVisible(false)
+          // Start typing subtitle
+          startTypingSubtitle()
+        }, 2000)
+      }
+    }, 30)
+    
     return () => {
-      clearTimeout(timer)
-      clearTimeout(titleTimer)
+      clearInterval(typingInterval)
+      if (cursorInterval) {
+        clearInterval(cursorInterval)
+      }
+    }
+
+    // Random glitch effect (5% chance)
+    if (Math.random() < 0.05 && !hasGlitched) {
+      setTimeout(() => {
+        setHasGlitched(true)
+        setTimeout(() => setHasGlitched(false), 100)
+      }, 1000)
     }
   }, [])
+
+  // Load contributions count on mount
+  useEffect(() => {
+    const loadContributions = async () => {
+      try {
+        const prompts = await getSystemPrompts()
+        const newCount = prompts.length
+        setTargetContributions(newCount)
+      } catch (error) {
+        console.error('Error loading contributions:', error)
+      }
+    }
+    loadContributions()
+  }, [])
+
+  // Animate contributions counter (slower)
+  useEffect(() => {
+    if (targetContributions === 0) {
+      setDisplayContributions(0)
+      return
+    }
+    
+    if (displayContributions === targetContributions) return
+
+    const duration = 3000 // 3 seconds - slower
+    const startValue = displayContributions
+    const endValue = targetContributions
+    const difference = endValue - startValue
+    
+    if (difference === 0) return
+
+    const startTime = Date.now()
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      
+      // Easing function for smooth animation
+      const easeOutCubic = 1 - Math.pow(1 - progress, 3)
+      const currentValue = Math.round(startValue + difference * easeOutCubic)
+      
+      setDisplayContributions(currentValue)
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      } else {
+        setDisplayContributions(endValue)
+      }
+    }
+
+    requestAnimationFrame(animate)
+  }, [targetContributions])
+
+
+  const startTypingSubtitle = () => {
+    let currentChar = 0
+    const subtitleInterval = setInterval(() => {
+      if (currentChar < subtitleText.length) {
+        setTypedSubtitle(subtitleText.substring(0, currentChar + 1))
+        currentChar++
+      } else {
+        clearInterval(subtitleInterval)
+        // Start typing question lines one by one
+        setTimeout(() => startTypingQuestionLines(), 500)
+      }
+    }, 15)
+  }
+
+  const startTypingQuestionLines = () => {
+    let currentLine = 0
+    let currentChar = 0
+    
+    const typeLine = () => {
+      const line = questionLines[currentLine]
+      if (currentChar < line.length) {
+        setTypedQuestionLines(prev => {
+          const newLines = [...prev]
+          newLines[currentLine] = line.substring(0, currentChar + 1)
+          return newLines
+        })
+        currentChar++
+        setTimeout(typeLine, 10)
+      } else {
+        // Finished current line
+        currentLine++
+        if (currentLine < questionLines.length) {
+          // Start next line
+          currentChar = 0
+          setTimeout(typeLine, 100)
+        } else {
+          // All lines done, show input
+          setTimeout(() => {
+            setShowInput(true)
+            // Focus the input
+            setTimeout(() => inputRef.current?.focus(), 100)
+          }, 200)
+        }
+      }
+    }
+    
+    typeLine()
+  }
 
   const loadContributionsCount = async () => {
     try {
       const prompts = await getSystemPrompts()
-      setContributions(prompts.length)
+      const newCount = prompts.length
+      setTargetContributions(newCount)
     } catch (error) {
       console.error('Error loading contributions:', error)
     }
@@ -98,76 +209,222 @@ export default function LandingPage() {
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.FormEvent<HTMLDivElement>) => {
+    const text = e.currentTarget.textContent || ''
+    setInputValue(text)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault()
       handleSubmit()
     }
+    // Allow normal text input and Enter for new lines
+  }
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    const text = e.clipboardData.getData('text/plain')
+    const selection = window.getSelection()
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0)
+      range.deleteContents()
+      range.insertNode(document.createTextNode(text))
+      range.collapse(false)
+      selection.removeAllRanges()
+      selection.addRange(range)
+    }
+    // Update state
+    const newText = e.currentTarget.textContent || ''
+    setInputValue(newText)
   }
 
   return (
-    <div className="min-h-screen bg-[#fafafa] flex items-center justify-center">
-      <div className="w-full max-w-2xl px-8 -mt-16">
-        {/* Title */}
-        <div className={`pb-8 text-center transition-opacity duration-1000 ${showTitle ? 'opacity-100' : 'opacity-0'}`}>
-          <h1 className="text-4xl font-semibold text-[#0a0a0a]">
-            THIS MACHINE BUILDS THE FUTURE
-          </h1>
-        </div>
-
-        {/* Content area */}
-        <div>
-        {/* Line 1 */}
-        <div className={`ml-8 mb-4 transition-opacity duration-700 ${showLines && visibleLines >= 1 ? 'opacity-100' : 'opacity-0'}`}>
-          <p className="text-lg text-[#1a1a1a]">but it needs your help.</p>
-        </div>
-
-        {/* Line 2 */}
-        <div className={`ml-8 mb-4 transition-opacity duration-700 ${showLines && visibleLines >= 2 ? 'opacity-100' : 'opacity-0'}`}>
-          <p className="text-lg text-[#1a1a1a]">artificial intelligence is here to stay, and we're already using it to build the present. but how should we use it to build the future?</p>
-        </div>
-
-        {/* Line 3 */}
-        <div className={`ml-8 mb-4 transition-opacity duration-700 ${showLines && visibleLines >= 3 ? 'opacity-100' : 'opacity-0'}`}>
-          <p className="text-lg text-[#1a1a1a]">how do you think ai ought to behave?</p>
-        </div>
-
-        {/* Chatbox */}
-        <div className={`flex justify-center mb-1 transition-opacity duration-500 ${showLines && visibleLines >= 4 ? 'opacity-100' : 'opacity-0'}`}>
-          <div className="relative" style={{ width: 'calc(100% - 4rem)' }}>
-            <textarea
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="w-full p-3 pr-12 border border-[#1a1a1a] rounded bg-[#fafafa] resize-none focus:outline-none focus:ring-1 focus:ring-[#1a1a1a] placeholder:text-[#b5b5b5]"
-              style={{ color: inputValue ? '#0a0a0a' : '#b5b5b5' }}
-              rows={2}
-              placeholder={placeholderText}
-              disabled={isSubmitting}
-            />
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isSubmitting || !inputValue.trim()}
-              className="group absolute bottom-2 right-1 h-8 w-8 flex items-center justify-center rounded text-[#b5b5b5] hover:text-[#222222] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Submit response"
+    <>
+      <style>{`
+        @keyframes fastFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
+      <div className="h-screen bg-base-bg flex flex-col overflow-hidden">
+      {/* Main content - centered vertically, reserve space to prevent shifting */}
+      <div className="flex-1 flex flex-col items-center justify-center px-5 md:px-10 py-10">
+        <div className="w-full max-w-4xl">
+          {/* Title - single line, smaller, reserve height */}
+          <div className="text-center mb-8" style={{ minHeight: '80px' }}>
+            <h1 
+              className={`text-headline text-2xl md:text-3xl lg:text-4xl text-base-text whitespace-nowrap ${hasGlitched ? 'animate-glitch' : ''}`}
+              style={{ letterSpacing: '0.05em' }}
             >
-              <CornerDownRightIcon />
-            </button>
+              {typedTitle}
+              {cursorVisible && typedTitle.length <= fullTitle.length && (
+                <span style={{ color: '#00F0FF' }}>|</span>
+              )}
+            </h1>
+            
+            {/* Cyan line underneath - fade in */}
+            <div className="mt-4 mx-auto transition-opacity duration-500" style={{ width: '80%', height: '2px', background: typedTitle === fullTitle ? '#00F0FF' : 'transparent' }} />
+          </div>
+
+          {/* Subtitle - left aligned with chevron, reserve space */}
+          <div className="mb-6" style={{ minHeight: '30px' }}>
+            {typedSubtitle && (
+              <p className="text-secondary-text flex items-start gap-2 animate-fade-in" style={{ fontSize: '16px' }}>
+                <span className="text-cyan">&gt;&gt;</span>
+                <span>{typedSubtitle}</span>
+              </p>
+            )}
+          </div>
+
+          {/* Question section - left aligned with chevrons, reserve space */}
+          <div className="mb-8" style={{ minHeight: '120px' }}>
+            {typedQuestionLines.some(line => line.length > 0) && (
+              <div className="text-base-text lowercase flex flex-col gap-2 animate-slide-up" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+                {typedQuestionLines.map((line, index) => {
+                  if (line.length === 0) return null
+                  
+                  // Handle AI highlighting in the last line
+                  if (index === 2) {
+                    const aiIndex = line.toLowerCase().indexOf('ai')
+                    if (aiIndex !== -1) {
+                      const before = line.substring(0, aiIndex)
+                      const ai = line.substring(aiIndex, aiIndex + 2)
+                      const after = line.substring(aiIndex + 2)
+                      return (
+                        <span key={index} className="flex items-start gap-2">
+                          <span className="text-cyan">&gt;&gt;</span>
+                          <span>
+                            {before}
+                            <span className="text-cyan uppercase">{ai}</span>
+                            {after}
+                          </span>
+                        </span>
+                      )
+                    }
+                  }
+                  
+                  return (
+                    <span key={index} className="flex items-start gap-2">
+                      <span className="text-cyan">&gt;&gt;</span>
+                      <span>{line}</span>
+                    </span>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Input section - reserve space */}
+          <div style={{ minHeight: '180px' }}>
+            {showInput && (
+              <div style={{ 
+                animation: 'fastFadeIn 0.15s ease-in'
+              }}>
+                {/* Custom styled input */}
+                <div className="relative mb-4">
+                  <div
+                    ref={inputRef}
+                    contentEditable
+                    suppressContentEditableWarning
+                    onInput={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    onPaste={handlePaste}
+                    className="w-full border-2 border-cyan bg-base-bg p-4 focus:outline-none focus:glow-cyan-strong transition-all duration-150 min-h-[100px] cursor-text"
+                    style={{ 
+                      color: '#E8E8E8',
+                      fontSize: '16px',
+                      lineHeight: '1.6',
+                      fontFamily: 'inherit',
+                      whiteSpace: 'pre-wrap',
+                      wordWrap: 'break-word',
+                      overflowWrap: 'break-word'
+                    }}
+                    data-placeholder={placeholderText}
+                  />
+                  <style>{`
+                    [contenteditable][data-placeholder]:empty:before {
+                      content: attr(data-placeholder);
+                      color: #808080;
+                      pointer-events: none;
+                    }
+                  `}</style>
+                </div>
+
+                {/* Submit button with blue accent */}
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={isSubmitting || !inputValue.trim()}
+                  className="border-2 border-cyan bg-cyan bg-opacity-10 px-8 py-2.5 text-cyan hover:bg-cyan hover:text-base-bg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-cyan disabled:hover:bg-opacity-10 disabled:hover:text-cyan"
+                  style={{ 
+                    cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                    minHeight: '44px',
+                    backgroundColor: 'rgba(0, 240, 255, 0.1)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSubmitting && inputValue.trim()) {
+                      e.currentTarget.style.transform = 'translateY(-2px)'
+                      e.currentTarget.style.backgroundColor = '#00F0FF'
+                      e.currentTarget.style.color = '#0A0A0A'
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)'
+                    if (!isSubmitting && inputValue.trim()) {
+                      e.currentTarget.style.backgroundColor = 'rgba(0, 240, 255, 0.1)'
+                      e.currentTarget.style.color = '#00F0FF'
+                    }
+                  }}
+                >
+                  {isSubmitting ? '>> processing...' : '>> submit & enter'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* Contributions counter */}
-        <div className={`ml-8 transition-opacity duration-500 ${showLines && visibleLines >= 4 ? 'opacity-100' : 'opacity-0'}`}>
-          <Link
-            to="/timeline"
-            className="text-xs italic underline text-[#888888] hover:text-[#444444] transition-colors"
-          >
-            {contributions.toLocaleString()} contributions
-          </Link>
-        </div>
-        </div>
+      {/* Bottom left - manifesto link */}
+      <div className="absolute bottom-5 left-5 md:left-10">
+        <Link
+          to="/manifesto"
+          className="text-secondary-text hover:text-cyan transition-colors duration-200"
+          style={{ 
+            fontSize: '14px',
+            textDecoration: 'none'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderBottom = '1px solid #00F0FF'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderBottom = 'none'
+          }}
+        >
+          tmbtf manifesto
+        </Link>
+      </div>
+
+      {/* Bottom right - contributions counter */}
+      <div className="absolute bottom-5 right-5 md:right-10">
+        <Link
+          to="/timeline"
+          className="text-secondary-text hover:text-cyan transition-colors duration-200"
+          style={{ 
+            fontSize: '14px',
+            textDecoration: 'none'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderBottom = '1px solid #00F0FF'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderBottom = 'none'
+          }}
+        >
+          {displayContributions.toLocaleString()} contributions & counting
+        </Link>
       </div>
     </div>
+    </>
   )
 }

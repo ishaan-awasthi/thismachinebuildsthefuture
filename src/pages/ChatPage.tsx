@@ -13,56 +13,37 @@ const chatSampleTexts = [
   'i had a great day today! can i tell you about it?',
 ]
 
-const CornerDownRightIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="h-4 w-4"
-    aria-hidden="true"
-  >
-    <polyline points="15 10 20 15 15 20" />
-    <path d="M4 4v7a4 4 0 0 0 4 4h12" />
-  </svg>
-)
-
 export default function ChatPage() {
-  const [showTitle, setShowTitle] = useState(false)
-  const [showChatbox, setShowChatbox] = useState(false)
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string }>>([])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [systemPrompt, setSystemPrompt] = useState<string>('')
+  const [ellipsisCount, setEllipsisCount] = useState(0)
   const [placeholderText] = useState(() => chatSampleTexts[Math.floor(Math.random() * chatSampleTexts.length)])
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Title fades in
-    const titleTimer = setTimeout(() => {
-      setShowTitle(true)
-    }, 1000)
-
-    // Chatbox fades in after title
-    const chatboxTimer = setTimeout(() => {
-      setShowChatbox(true)
-      loadSystemPrompt()
-    }, 2000)
-
-    return () => {
-      clearTimeout(titleTimer)
-      clearTimeout(chatboxTimer)
-    }
+    loadSystemPrompt()
   }, [])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  useEffect(() => {
+    // Animated ellipsis for loading state
+    let interval: NodeJS.Timeout
+    if (isLoading) {
+      interval = setInterval(() => {
+        setEllipsisCount((prev) => (prev + 1) % 4)
+      }, 500)
+    }
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [isLoading])
 
   const loadSystemPrompt = async () => {
     try {
@@ -79,6 +60,10 @@ export default function ChatPage() {
 
     const userMessage = inputValue.trim()
     setInputValue('')
+    // Clear the contentEditable div
+    if (inputRef.current) {
+      inputRef.current.textContent = ''
+    }
     setMessages(prev => [...prev, { role: 'user', content: userMessage }])
     setIsLoading(true)
 
@@ -131,100 +116,175 @@ export default function ChatPage() {
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.FormEvent<HTMLDivElement>) => {
+    const text = e.currentTarget.textContent || ''
+    setInputValue(text)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault()
       handleSubmit()
     }
   }
 
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    const text = e.clipboardData.getData('text/plain')
+    const selection = window.getSelection()
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0)
+      range.deleteContents()
+      range.insertNode(document.createTextNode(text))
+      range.collapse(false)
+      selection.removeAllRanges()
+      selection.addRange(range)
+    }
+    // Update state
+    const newText = e.currentTarget.textContent || ''
+    setInputValue(newText)
+  }
+
+  const getEllipsis = () => {
+    return '.'.repeat(ellipsisCount)
+  }
+
   return (
-    <div className="min-h-screen bg-[#fafafa] flex flex-col">
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-full max-w-2xl px-8 -mt-16">
-        {/* Title */}
-        <div className={`pb-8 text-center transition-opacity duration-1000 ${showTitle ? 'opacity-100' : 'opacity-0'}`}>
-          <h1 className="text-4xl font-semibold text-[#0a0a0a]">
-            THIS MACHINE BUILDS THE FUTURE
-          </h1>
-        </div>
-
-        {/* Chat interface */}
-        <div className={`transition-opacity duration-700 ${showChatbox ? 'opacity-100' : 'opacity-0'}`}>
-          <div className="flex flex-col" style={{ width: 'calc(100% - 4rem)', margin: '0 auto' }}>
-            {/* Messages area */}
-            <div className="border border-[#1a1a1a] rounded bg-[#fafafa] mb-2 min-h-[400px] max-h-[500px] overflow-y-auto p-4">
-              {messages.length === 0 ? (
-                <p className="text-[#b5b5b5] text-sm">start a conversation...</p>
-              ) : (
-                <div className="space-y-4">
-                  {messages.map((msg, idx) => (
-                    <div
-                      key={idx}
-                      className={`${
-                        msg.role === 'user' ? 'text-right' : 'text-left'
-                      }`}
-                    >
-                      <p
-                        className={`inline-block p-2 rounded ${
-                          msg.role === 'user'
-                            ? 'bg-[#1a1a1a] text-[#fafafa]'
-                            : 'bg-[#e5e5e5] text-[#1a1a1a]'
-                        }`}
-                      >
-                        {msg.content}
-                      </p>
-                    </div>
-                  ))}
-                  {isLoading && (
-                    <div className="text-left">
-                      <p className="inline-block p-2 rounded bg-[#e5e5e5] text-[#1a1a1a]">
-                        thinking...
-                      </p>
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-              )}
-            </div>
-
-            {/* Input area */}
-            <div className="relative">
-              <textarea
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="w-full p-3 pr-12 border border-[#1a1a1a] rounded bg-[#fafafa] resize-none focus:outline-none focus:ring-1 focus:ring-[#1a1a1a] placeholder:text-[#b5b5b5]"
-                style={{ color: inputValue ? '#0a0a0a' : '#b5b5b5' }}
-                rows={2}
-                placeholder={placeholderText}
-                disabled={isLoading}
-              />
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isLoading || !inputValue.trim()}
-                className="group absolute bottom-2 right-1 h-8 w-8 flex items-center justify-center rounded text-[#b5b5b5] hover:text-[#222222] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Send message"
-              >
-                <CornerDownRightIcon />
-              </button>
-            </div>
-          </div>
-        </div>
-        </div>
-      </div>
-      
-      {/* Return home link */}
-      <div className="pb-8 text-center">
+    <div className="min-h-screen bg-base-bg flex flex-col">
+      {/* Fixed header */}
+      <header className="fixed top-0 left-0 right-0 h-20 flex items-center justify-between px-5 md:px-10 z-10 border-b border-border" style={{ backgroundColor: '#0A0A0A' }}>
+        <h1 className="text-headline text-2xl md:text-3xl text-base-text">
+          THIS MACHINE BUILDS THE FUTURE
+        </h1>
         <Link
           to="/"
-          className="text-xs italic underline text-[#888888] hover:text-[#444444] transition-colors"
+          className="text-secondary-text hover:text-cyan hover:underline transition-all duration-200 text-sm md:text-base"
+          style={{ textDecoration: 'none' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderBottom = '2px solid #00F0FF'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderBottom = 'none'
+          }}
         >
           return home
         </Link>
+      </header>
+
+      {/* Messages container - fills remaining height, scrollable */}
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto px-5 md:px-10 py-5 pt-24 pb-32"
+        style={{ minHeight: 0 }}
+      >
+        {messages.length === 0 ? (
+          <p className="text-secondary-text text-sm">start a conversation below...</p>
+        ) : (
+          <div className="space-y-8">
+            {messages.map((msg, idx) => (
+              <div
+                key={idx}
+                className={`flex ${
+                  msg.role === 'user' ? 'justify-end' : 'justify-start'
+                }`}
+              >
+                <div
+                  className="max-w-[70%]"
+                  style={{
+                    paddingLeft: '15px',
+                    borderLeft: `3px solid ${msg.role === 'user' ? '#00F0FF' : '#808080'}`,
+                  }}
+                >
+                  <span className="text-cyan mr-2">
+                    {msg.role === 'user' ? '>' : '>>'}
+                  </span>
+                  <span className="text-base-text" style={{ fontSize: '16px', lineHeight: '1.6' }}>
+                    {msg.content}
+                  </span>
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div
+                  className="max-w-[70%]"
+                  style={{
+                    paddingLeft: '15px',
+                    borderLeft: '3px solid #808080',
+                  }}
+                >
+                  <span className="text-cyan mr-2">&gt;&gt;</span>
+                  <span className="text-base-text" style={{ fontSize: '16px' }}>
+                    {getEllipsis()}
+                  </span>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
+      </div>
+
+      {/* Fixed input area at bottom */}
+      <div className="fixed bottom-0 left-0 right-0 border-t border-border p-5 z-10" style={{ backgroundColor: '#0A0A0A' }}>
+        <div className="flex gap-3">
+          <div className="relative flex-1">
+            <div
+              ref={inputRef}
+              contentEditable
+              suppressContentEditableWarning
+              onInput={handleInputChange}
+              onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
+              className="w-full border-2 border-cyan bg-base-bg p-4 focus:outline-none focus:glow-cyan-strong transition-all duration-150 min-h-[80px] cursor-text"
+              style={{ 
+                color: '#E8E8E8',
+                fontSize: '16px',
+                lineHeight: '1.6',
+                fontFamily: 'inherit',
+                whiteSpace: 'pre-wrap',
+                wordWrap: 'break-word',
+                overflowWrap: 'break-word'
+              }}
+              data-placeholder={placeholderText}
+            />
+            <style>{`
+              [contenteditable][data-placeholder]:empty:before {
+                content: attr(data-placeholder);
+                color: #808080;
+                pointer-events: none;
+              }
+            `}</style>
+          </div>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isLoading || !inputValue.trim()}
+            className="border-2 border-cyan bg-cyan bg-opacity-10 px-8 py-2.5 text-cyan hover:bg-cyan hover:text-base-bg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-cyan disabled:hover:bg-opacity-10 disabled:hover:text-cyan"
+            style={{ 
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              minHeight: '44px',
+              backgroundColor: 'rgba(0, 240, 255, 0.1)'
+            }}
+            onMouseEnter={(e) => {
+              if (!isLoading && inputValue.trim()) {
+                e.currentTarget.style.transform = 'translateY(-2px)'
+                e.currentTarget.style.backgroundColor = '#00F0FF'
+                e.currentTarget.style.color = '#0A0A0A'
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)'
+              if (!isLoading && inputValue.trim()) {
+                e.currentTarget.style.backgroundColor = 'rgba(0, 240, 255, 0.1)'
+                e.currentTarget.style.color = '#00F0FF'
+              }
+            }}
+          >
+            &gt;&gt; send
+          </button>
+        </div>
       </div>
     </div>
   )
 }
-
