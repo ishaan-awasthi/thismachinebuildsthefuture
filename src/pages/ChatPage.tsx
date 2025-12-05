@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { getAllSubmissions, generateCombinedSystemPrompt } from '../lib/api'
+import { getConcatenatedSystemPrompt } from '../lib/api'
 
 const chatSampleTexts = [
   'hi! my name is george washington.',
@@ -46,14 +46,11 @@ export default function ChatPage() {
 
   const loadSystemPrompt = async () => {
     try {
-      const submissions = await getAllSubmissions()
-      const prompt = await generateCombinedSystemPrompt(submissions)
+      const prompt = await getConcatenatedSystemPrompt()
       setSystemPrompt(prompt || '')
-      return prompt || ''
     } catch (error) {
       console.error('Error loading system prompt:', error)
       setSystemPrompt('')
-      return ''
     }
   }
 
@@ -70,14 +67,8 @@ export default function ChatPage() {
     setIsLoading(true)
 
     try {
-      // Use the already-loaded system prompt (loaded once on mount)
-      const promptToUse = systemPrompt || ''
-
       console.log('[AI #2] Sending chat message:', userMessage.substring(0, 50) + '...')
-      console.log('[AI #2] System prompt length:', promptToUse?.length || 0)
-      if (promptToUse) {
-        console.log('[AI #2] System prompt preview:', promptToUse.substring(0, 200))
-      }
+      console.log('[AI #2] System prompt length:', systemPrompt?.length || 0)
 
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -86,7 +77,7 @@ export default function ChatPage() {
         },
         body: JSON.stringify({
           message: userMessage,
-          systemPrompt: promptToUse || '',
+          systemPrompt: systemPrompt || '',
         }),
       })
 
