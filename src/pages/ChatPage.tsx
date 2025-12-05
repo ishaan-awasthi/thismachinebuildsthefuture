@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { getConcatenatedSystemPrompt } from '../lib/api'
+import { getAllSubmissions, generateCombinedSystemPrompt } from '../lib/api'
 
 const chatSampleTexts = [
   'hi! my name is george washington.',
@@ -46,7 +46,8 @@ export default function ChatPage() {
 
   const loadSystemPrompt = async () => {
     try {
-      const prompt = await getConcatenatedSystemPrompt()
+      const submissions = await getAllSubmissions()
+      const prompt = await generateCombinedSystemPrompt(submissions)
       setSystemPrompt(prompt || '')
     } catch (error) {
       console.error('Error loading system prompt:', error)

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { processSubmission, getSystemPrompts } from '../lib/api'
+import { processSubmission, getAllSubmissions } from '../lib/api'
 
 const fullTitle = 'THIS MACHINE BUILDS THE FUTURE'
 const subtitleText = "but it needs your help."
@@ -71,9 +71,8 @@ export default function LandingPage() {
   useEffect(() => {
     const loadContributions = async () => {
       try {
-        const prompts = await getSystemPrompts()
-        const newCount = prompts.length
-        setTargetContributions(newCount)
+        const submissions = await getAllSubmissions()
+        setTargetContributions(submissions.length)
       } catch (error) {
         console.error('Error loading contributions:', error)
       }
