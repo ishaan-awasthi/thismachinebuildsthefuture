@@ -170,8 +170,8 @@ export default function LandingPage() {
 
   const loadContributionsCount = async () => {
     try {
-      const prompts = await getSystemPrompts()
-      const newCount = prompts.length
+      const submissions = await getAllSubmissions()
+      const newCount = submissions.length
       setTargetContributions(newCount)
     } catch (error) {
       console.error('Error loading contributions:', error)
