@@ -33,7 +33,7 @@ export default function LandingPage() {
   useEffect(() => {
     // Letter-by-letter typing animation for title
     let currentChar = 0
-    let cursorInterval: NodeJS.Timeout | null = null
+    let cursorInterval: number | null = null
     
     // Cursor blink animation
     cursorInterval = setInterval(() => {

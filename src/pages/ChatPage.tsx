@@ -33,7 +33,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     // Animated ellipsis for loading state
-    let interval: NodeJS.Timeout
+    let interval: number | undefined
     if (isLoading) {
       interval = setInterval(() => {
         setEllipsisCount((prev) => (prev + 1) % 4)
@@ -154,7 +154,7 @@ export default function ChatPage() {
         </h1>
         <Link
           to="/"
-          className="text-secondary-text hover:text-cyan hover:underline transition-all duration-200 text-sm md:text-base"
+          className="text-primary-text hover:text-cyan hover:underline transition-all duration-200 text-sm md:text-base"
           style={{ textDecoration: 'none' }}
           onMouseEnter={(e) => {
             e.currentTarget.style.borderBottom = '2px solid #00F0FF'
