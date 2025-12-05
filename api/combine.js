@@ -23,6 +23,12 @@ export default async function handler(req, res) {
 
     const promptText = ideas.join('\n- ');
 
+    console.log('[combine] ideas count:', ideas.length);
+    console.log('[combine] texts used to make prompt:');
+    ideas.forEach((idea, index) => {
+      console.log(`[combine]   ${index + 1}. ${idea.substring(0, 100)}${idea.length > 100 ? '...' : ''}`);
+    });
+
     const response = await openai.responses.create({
       model: 'gpt-5-nano-2025-08-07',
       reasoning: { effort: 'low' },
@@ -32,7 +38,6 @@ export default async function handler(req, res) {
     });
 
     const combined = response.output_text?.trim() || '';
-    console.log('[combine] ideas count:', ideas.length);
     console.log('[combine] combined prompt preview:', combined.substring(0, 200));
 
     return res.status(200).json({

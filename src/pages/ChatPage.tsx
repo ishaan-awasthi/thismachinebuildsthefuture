@@ -70,11 +70,8 @@ export default function ChatPage() {
     setIsLoading(true)
 
     try {
-      // Ensure we have a system prompt even on the first message
-      let promptToUse = systemPrompt
-      if (!promptToUse) {
-        promptToUse = await loadSystemPrompt()
-      }
+      // Use the already-loaded system prompt (loaded once on mount)
+      const promptToUse = systemPrompt || ''
 
       console.log('[AI #2] Sending chat message:', userMessage.substring(0, 50) + '...')
       console.log('[AI #2] System prompt length:', promptToUse?.length || 0)

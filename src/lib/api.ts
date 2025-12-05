@@ -98,12 +98,29 @@ export async function generateCombinedSystemPrompt(submissions: Submission[], re
   throw new Error('Failed to generate combined prompt after multiple attempts.')
 }
 
-// Process a submission: save it (no per-idea prompt generation)
+// Process a submission: pull all submissions, add new idea, generate prompt, then save
 export async function processSubmission(idea: string): Promise<void> {
   try {
-    console.log('[Process] Saving submission...')
+    console.log('[Process] Step 1: Pulling all existing submissions...')
+    const existingSubmissions = await getAllSubmissions()
+    console.log('[Process] Found', existingSubmissions.length, 'existing submissions')
+    
+    console.log('[Process] Step 2: Generating combined prompt with all submissions + new idea...')
+    // Create a temporary submission list that includes the new idea
+    const allIdeas = [...existingSubmissions.map(s => s.idea), idea]
+    const tempSubmissions = allIdeas.map((ideaText, index) => ({
+      id: `temp-${index}`,
+      idea: ideaText,
+      created_at: new Date().toISOString()
+    }))
+    
+    // Generate the combined prompt (this includes the new idea)
+    await generateCombinedSystemPrompt(tempSubmissions)
+    console.log('[Process] Combined prompt generated (includes new idea)')
+    
+    console.log('[Process] Step 3: Saving new submission to Supabase...')
     await saveSubmission(idea)
-    console.log('[Process] Submission saved.')
+    console.log('[Process] Submission saved successfully')
   } catch (error) {
     console.error('[Process] Error in processSubmission:', error)
     throw error
