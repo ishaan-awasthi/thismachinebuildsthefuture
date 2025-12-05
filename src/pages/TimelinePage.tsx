@@ -114,7 +114,7 @@ export default function TimelinePage() {
             e.currentTarget.style.borderBottom = 'none'
           }}
         >
-          return home
+          &gt;&gt; return home
         </Link>
       </header>
 

@@ -163,18 +163,19 @@ export default function ChatPage() {
             e.currentTarget.style.borderBottom = 'none'
           }}
         >
-          return home
+          &gt;&gt; return home
         </Link>
       </header>
 
       {/* Messages container - fills remaining height, scrollable */}
       <div
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto px-5 md:px-10 py-5 pt-24 pb-32"
+        className="flex-1 overflow-y-auto py-5 pt-24 pb-32"
         style={{ minHeight: 0 }}
       >
+        <div className="max-w-5xl mx-auto px-5 md:px-10">
         {messages.length === 0 ? (
-          <p className="text-secondary-text text-sm">start a conversation below...</p>
+          <p className="text-secondary-text text-sm">&gt;&gt; start a conversation below...</p>
         ) : (
           <div className="space-y-8">
             {messages.map((msg, idx) => (
@@ -219,6 +220,7 @@ export default function ChatPage() {
             <div ref={messagesEndRef} />
           </div>
         )}
+        </div>
       </div>
 
       {/* Fixed input area at bottom */}
