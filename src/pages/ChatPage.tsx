@@ -49,9 +49,11 @@ export default function ChatPage() {
       const submissions = await getAllSubmissions()
       const prompt = await generateCombinedSystemPrompt(submissions)
       setSystemPrompt(prompt || '')
+      return prompt || ''
     } catch (error) {
       console.error('Error loading system prompt:', error)
       setSystemPrompt('')
+      return ''
     }
   }
 
@@ -68,8 +70,17 @@ export default function ChatPage() {
     setIsLoading(true)
 
     try {
+      // Ensure we have a system prompt even on the first message
+      let promptToUse = systemPrompt
+      if (!promptToUse) {
+        promptToUse = await loadSystemPrompt()
+      }
+
       console.log('[AI #2] Sending chat message:', userMessage.substring(0, 50) + '...')
-      console.log('[AI #2] System prompt length:', systemPrompt?.length || 0)
+      console.log('[AI #2] System prompt length:', promptToUse?.length || 0)
+      if (promptToUse) {
+        console.log('[AI #2] System prompt preview:', promptToUse.substring(0, 200))
+      }
 
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -78,7 +89,7 @@ export default function ChatPage() {
         },
         body: JSON.stringify({
           message: userMessage,
-          systemPrompt: systemPrompt || '',
+          systemPrompt: promptToUse || '',
         }),
       })
 

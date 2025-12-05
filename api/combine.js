@@ -31,8 +31,12 @@ export default async function handler(req, res) {
       input: promptText,
     });
 
+    const combined = response.output_text?.trim() || '';
+    console.log('[combine] ideas count:', ideas.length);
+    console.log('[combine] combined prompt preview:', combined.substring(0, 200));
+
     return res.status(200).json({
-      combinedPrompt: response.output_text?.trim() || '',
+      combinedPrompt: combined,
     });
   } catch (error) {
     console.error('Combine API Error:', error);
