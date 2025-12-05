@@ -1,18 +1,4 @@
 import { supabase } from './supabase'
-import OpenAI from 'openai'
-
-// Initialize OpenAI client
-const AI_API_KEY = import.meta.env.VITE_AI_API_KEY || ''
-const openai = new OpenAI({
-  apiKey: AI_API_KEY,
-  dangerouslyAllowBrowser: true, // Required for browser usage
-})
-
-// Debug: Log if API key is loaded (only first few chars for security)
-if (typeof window !== 'undefined') {
-  console.log('[API Config] API Key loaded:', AI_API_KEY ? `${AI_API_KEY.substring(0, 7)}...` : 'NOT FOUND')
-  console.log('[API Config] All env vars:', Object.keys(import.meta.env).filter(k => k.startsWith('VITE_')))
-}
 
 export interface Submission {
   id?: string
@@ -52,38 +38,37 @@ const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 // Transform idea using AI API (AI #1: transforms user ideas into system prompts)
 export async function transformIdeaToPrompt(idea: string, retries: number = 3): Promise<string> {
-  if (!AI_API_KEY) {
-    console.error('VITE_AI_API_KEY is not set in environment variables')
-    throw new Error('API key not configured. Please set VITE_AI_API_KEY in your .env file.')
-  }
-
   console.log('[AI #1] Transforming idea to prompt:', idea.substring(0, 50) + '...')
-  console.log('[AI #1] API Key present:', !!AI_API_KEY)
 
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
-      const response = await openai.responses.create({
-        model: 'gpt-5-nano-2025-08-07',
-        reasoning: { effort: 'low' },
-        instructions: 'Transform this idea into a string of text that can be used to prompt the behavior of an LLM. Assume it will be added to already existing list of a similar style, so keep your prompt brief.',
-        input: idea,
+      const response = await fetch('/api/transform', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idea }),
       })
 
-      const result = response.output_text?.trim() || ''
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `HTTP ${response.status}`)
+      }
+
+      const data = await response.json()
+      const result = data.prompt?.trim() || ''
+      
       if (!result) {
         throw new Error('AI returned an empty response')
       }
+      
       console.log('[AI #1] Transformation result:', result.substring(0, 50) + '...')
       return result
     } catch (error: any) {
-      console.error(`[AI #1] Error calling AI API (attempt ${attempt + 1}/${retries}):`, error)
+      console.error(`[AI #1] Error calling API (attempt ${attempt + 1}/${retries}):`, error)
       
-      // Check if it's a quota exceeded error (not just rate limit)
-      const errorMessage = error?.message || ''
-      const isQuotaExceeded = errorMessage.includes('quota') || errorMessage.includes('billing')
-      
-      // Handle rate limit with exponential backoff (only if not quota exceeded)
-      if (error?.status === 429 && !isQuotaExceeded) {
+      // Handle rate limit with exponential backoff
+      if (error?.message?.includes('429') || error?.message?.includes('rate limit')) {
         if (attempt < retries - 1) {
           const delay = Math.pow(2, attempt) * 1000 // 1s, 2s, 4s
           console.log(`[AI #1] Rate limited. Retrying in ${delay}ms...`)
@@ -93,17 +78,8 @@ export async function transformIdeaToPrompt(idea: string, retries: number = 3): 
         throw new Error('Rate limit exceeded. Please try again later.')
       }
       
-      // Quota exceeded - don't retry, just fail immediately
-      if (error?.status === 429 && isQuotaExceeded) {
-        throw new Error('OpenAI quota exceeded. Please check your billing and add credits to your account.')
-      }
-      
-      if (error?.status === 401) {
-        throw new Error('Invalid API key. Please check your VITE_AI_API_KEY in .env file.')
-      }
-      
-      // If it's the last attempt or not a rate limit, throw the error
-      if (attempt === retries - 1 || error?.status !== 429) {
+      // If it's the last attempt, throw the error
+      if (attempt === retries - 1) {
         if (error?.message) {
           throw new Error(`AI API error: ${error.message}`)
         }

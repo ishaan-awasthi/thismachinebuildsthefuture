@@ -105,7 +105,7 @@ export default function TimelinePage() {
         </h1>
         <Link
           to="/"
-          className="text-secondary-text hover:text-cyan hover:underline transition-all duration-200 text-sm md:text-base"
+          className="text-primary-text hover:text-cyan hover:underline transition-all duration-200 text-sm md:text-base"
           style={{ textDecoration: 'none' }}
           onMouseEnter={(e) => {
             e.currentTarget.style.borderBottom = '2px solid #00F0FF'

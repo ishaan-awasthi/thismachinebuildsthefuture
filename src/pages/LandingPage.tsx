@@ -388,9 +388,9 @@ export default function LandingPage() {
       <div className="absolute bottom-5 left-5 md:left-10">
         <Link
           to="/manifesto"
-          className="text-secondary-text hover:text-cyan transition-colors duration-200"
+          className="text-primary-text hover:text-cyan transition-colors duration-200"
           style={{ 
-            fontSize: '14px',
+            fontSize: '18px',
             textDecoration: 'none'
           }}
           onMouseEnter={(e) => {
@@ -400,7 +400,7 @@ export default function LandingPage() {
             e.currentTarget.style.borderBottom = 'none'
           }}
         >
-          tmbtf manifesto
+          &gt;&gt; tmbtf manifesto
         </Link>
       </div>
 
@@ -408,9 +408,9 @@ export default function LandingPage() {
       <div className="absolute bottom-5 right-5 md:right-10">
         <Link
           to="/timeline"
-          className="text-secondary-text hover:text-cyan transition-colors duration-200"
+          className="text-primary-text hover:text-cyan transition-colors duration-200"
           style={{ 
-            fontSize: '14px',
+            fontSize: '18px',
             textDecoration: 'none'
           }}
           onMouseEnter={(e) => {
@@ -420,7 +420,7 @@ export default function LandingPage() {
             e.currentTarget.style.borderBottom = 'none'
           }}
         >
-          {displayContributions.toLocaleString()} contributions & counting
+          &gt;&gt; {displayContributions.toLocaleString()} contributions & counting
         </Link>
       </div>
     </div>

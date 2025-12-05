@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { getConcatenatedSystemPrompt } from '../lib/api'
-import OpenAI from 'openai'
 
 const chatSampleTexts = [
   'hi! my name is george washington.',
@@ -68,30 +67,27 @@ export default function ChatPage() {
     setIsLoading(true)
 
     try {
-      const AI_API_KEY = import.meta.env.VITE_AI_API_KEY || ''
-
-      if (!AI_API_KEY) {
-        throw new Error('API key not configured. Please set VITE_AI_API_KEY in your .env file.')
-      }
-
-      const openai = new OpenAI({
-        apiKey: AI_API_KEY,
-        dangerouslyAllowBrowser: true,
-      })
-
       console.log('[AI #2] Sending chat message:', userMessage.substring(0, 50) + '...')
-      console.log('[AI #2] API Key present:', !!AI_API_KEY)
-      console.log('[AI #2] API Key preview:', AI_API_KEY ? `${AI_API_KEY.substring(0, 7)}...` : 'MISSING')
       console.log('[AI #2] System prompt length:', systemPrompt?.length || 0)
 
-      const response = await openai.responses.create({
-        model: 'gpt-5-nano-2025-08-07',
-        reasoning: { effort: 'low' },
-        instructions: systemPrompt || '',
-        input: userMessage,
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          systemPrompt: systemPrompt || '',
+        }),
       })
 
-      const assistantMessage = response.output_text?.trim() || 'Sorry, I could not generate a response.'
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `HTTP ${response.status}`)
+      }
+
+      const data = await response.json()
+      const assistantMessage = data.response?.trim() || 'Sorry, I could not generate a response.'
       console.log('[AI #2] Received response:', assistantMessage.substring(0, 50) + '...')
       setMessages(prev => [...prev, { role: 'assistant', content: assistantMessage }])
     } catch (error: any) {
@@ -102,7 +98,7 @@ export default function ChatPage() {
       if (error?.status === 429) {
         errorMessage = 'Rate limit exceeded. Please wait a moment and try again.'
       } else if (error?.status === 401) {
-        errorMessage = 'Invalid API key. Please check your VITE_AI_API_KEY in .env file.'
+        errorMessage = 'Invalid API key. Please check your server configuration.'
       } else if (error?.message) {
         errorMessage = error.message
       }
