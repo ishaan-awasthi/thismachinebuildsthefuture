@@ -27,22 +27,34 @@ export default function ManifestoPage() {
       <div className="flex-1 pt-20 px-12 md:px-24 py-16 md:py-32">
         <div className="max-w-2xl mx-auto">
           <div className="text-base-text" style={{ fontSize: '20px', lineHeight: '1.6' }}>
+            <p style={{ color: '#00F0FF', marginTop: '2rem', marginBottom: '1rem' }}>CHAPTER I: THIS MACHINE</p>
+
+            
             <p className="mb-6">
               ThisMachineBuildsTheFuture.com (or TMBTF, as we will succinctly refer to it for the purposes of this manifesto) is a collective experiment in AI behavior. The project features a simplified chatbot interface to converse and interact with an LLM. However, before getting access to the bot, every visitor must give their own answer to the same question: "Artificial intelligence is here to stay, and we're already using it to build the present. But how should we use it to build the future? How do you think AI ought to behave?" Their thoughts are then added to a growing public timeline-dataset used to rewrite the chatbot's system prompt, producing an LLM representing the combined aspirations and motivations of its contributors.
             </p>
-            
-            <p className="mb-6">
-              Just as users' personal philosophies are observed in producing the future of TMBTF, the project itself had three main inspirations. The first of these dates back almost six centuries to 1440, when German goldsmith Johannes Gutenberg invented the movable-type printing press. However, despite having the potential to revolutionize communication itself — which it eventually did go on to do by inadvertently providing the impetus to the European Printing Revolution — Gutenberg himself "lived in the scribe's time" and solely used his new technology to reproduce copies of older manuscripts (Jarvis). In similar fashion, we presently treat AI as an attempt to recreate the intricacies of the human condition. Instead, what if it could be something entirely different that we have not yet considered? The specifics of that question are impossible to answer without a shift in our mindset itself in regards to AI; TMBTF accelerates this process by forcing users to consider the future of AI rather than just its present, and if one desires access to the agora, they must first make a contribution of their own.
+
+            <p style={{ color: '#00F0FF', marginTop: '2rem', marginBottom: '1rem' }}>CHAPTER II: THE MYOPIC SCRIBE</p>
+
+            <p className="mb-12">
+              Let's travel back in time, almost six centuries. In 1440, German goldsmith Johannes Gutenberg perfected the movable-type printing press. His unprecedented invention had the potential to revolutionize communication itself — which it eventually did go on to do by inadvertently providing the impetus to the European Printing Revolution — but Gutenberg himself "lived in the scribe's time" and solely used his new technology to reproduce copies of older manuscripts (Jarvis). In similar fashion, we presently treat AI as an attempt to recreate the intricacies of the human condition. Instead, what if it could be something entirely different that we have not yet considered? The specifics of that question are impossible to answer without a shift in our mindset itself in regards to AI, but TMBTF both accelerates and crowdsources that process, since users have to consider (and coauthor) the future of AI rather than just its present. And if one desires access to the agora, they must first make a contribution of their own to its discourse.
             </p>
-            
-            <p className="mb-6">
+
+            <p style={{ color: '#00F0FF', marginTop: '2rem', marginBottom: '1rem' }}>CHAPTER III: AN AUTHENTIC ARTIFICIALITY</p>
+
+            <p className="mb-12">
               A common view held by opponents of generative technologies is that the output of any AI is exactly that: artificial. Yet this does not detract from the authenticity of a medium such as TMBTF, nor from the text it produces. Written language itself is an artificial construct, yet it has become one of the most essential tools for preserving and expanding knowledge across generations (Ong). That perspective helps us see AI differently: perhaps its writing is synthetic, but so is all writing. The key, as Ong says, is whether we properly interiorize, and whether we make it serve human understanding instead of letting it replace it. TMBTF embodies this principle by holding human influence as the most important part of the design architecture.
             </p>
-            
+
+            <p style={{ color: '#00F0FF', marginTop: '2rem', marginBottom: '1rem' }}>CHAPTER IV: SENSE IN NUMBERS</p>
+
             <p className="mb-6">
               Yet meaning is not the same as purpose, and as key linguistics, ethicists, and engineers argue, generative AI tools lack such "communicative intent" (Bender). They are correct, and we cannot readily fix this — but we can put humans back in control of it. TMBTF still lacks its own internal goals, emotions, or mental states, but it ends up carrying the aggregated intent of its community (which is arguably more interesting than an artificial "personality" anyway). Over time, the bot will become a reflection of thousands of tiny human fingerprints, forming an amalgamated philosophy to drive the AI — a machine shaped not by specific intention, but by plurality and community.
             </p>
             
+
+            <p style={{ color: '#00F0FF', marginTop: '2rem', marginBottom: '1rem' }}>CHAPTER V: BUILDING THE FUTURE</p>
+
             <p className="mb-6">
               Blending inspirations of the past, faculties of the present, and motivations of the future, TMBTF illustrates AI reimagined. Through democratized purpose, axiological legitimacy, and communicative intent, the site's loud assertion holds true; this machine builds the future. But there's a more quiet corollary to that proclamation — it needs your help.
             </p>
