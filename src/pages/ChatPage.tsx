@@ -6,7 +6,7 @@ const chatSampleTexts = [
   'hi! my name is george washington.',
   'what is boba made of?',
   'i had a bad day and want to talk about it',
-  'my favorite color is yellow',
+  'my favorite color is green',
   'hiiiiiii',
   'hi, i need someone to talk to',
   'i had a great day today! can i tell you about it?',
