@@ -63,6 +63,51 @@
   }
 }
 
+@media (max-width: 640px) {
+  .header-inner {
+    padding: 14px 1.25rem !important;
+    gap: 12px;
+  }
+  .header-title {
+    font-size: 1.05rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .landing-title {
+    font-size: 1.9rem !important;
+  }
+  .landing-footer {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+    padding: 16px 1.25rem !important;
+  }
+  .submit-btn-mobile {
+    width: 100% !important;
+    text-align: center !important;
+    box-sizing: border-box !important;
+  }
+  .chat-input-bar {
+    padding: 10px 1rem !important;
+  }
+  .chat-send-btn {
+    padding: 0 16px !important;
+    font-size: 1.1rem !important;
+  }
+  .messages-padding {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  .msg-bubble {
+    max-width: 90% !important;
+  }
+  .manifesto-content {
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+  }
+}
+
 @layer utilities {
   .text-headline {
     font-family: var(--font-display);

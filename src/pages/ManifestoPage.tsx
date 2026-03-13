@@ -10,11 +10,11 @@ export default function ManifestoPage() {
         background: '#0D0B09', borderBottom: '1px solid #2A2018',
       }}>
         <div style={{ height: '4px', background: '#D42B1E' }} />
-        <div style={{
+        <div className="header-inner" style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '18px clamp(1.5rem, 6vw, 5rem)',
         }}>
-          <h1 style={{
+          <h1 className="header-title" style={{
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(1.6rem, 3.5vw, 2.8rem)',
             letterSpacing: '0.04em', color: '#F0EBE3', lineHeight: 1,
@@ -35,8 +35,8 @@ export default function ManifestoPage() {
         flex: 1,
         paddingTop: '110px',
         paddingBottom: '80px',
-        paddingLeft: 'clamp(1.5rem, 8vw, 6rem)',
-        paddingRight: 'clamp(1.5rem, 8vw, 6rem)',
+        paddingLeft: 'clamp(1.25rem, 8vw, 6rem)',
+        paddingRight: 'clamp(1.25rem, 8vw, 6rem)',
       }}>
         <div style={{ maxWidth: '680px', margin: '0 auto' }}>
 

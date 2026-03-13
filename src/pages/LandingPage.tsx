@@ -172,7 +172,7 @@ export default function LandingPage() {
 
           {/* TITLE */}
           <div style={{ marginBottom: '2.5rem' }}>
-            <h1 style={{
+            <h1 className="landing-title" style={{
               fontFamily: 'var(--font-display)',
               fontSize: 'clamp(2.4rem, 7vw, 6rem)',
               lineHeight: 0.88,
@@ -265,6 +265,7 @@ export default function LandingPage() {
                 />
                 <button
                   type="button"
+                  className="submit-btn-mobile"
                   onClick={handleSubmit}
                   disabled={isSubmitting || !inputValue.trim()}
                   style={{
@@ -297,7 +298,7 @@ export default function LandingPage() {
         </div>
 
         {/* ── Footer bar ── */}
-        <div style={{
+        <div className="landing-footer" style={{
           borderTop: '1px solid #2A2018',
           padding: '16px clamp(1.5rem, 6vw, 5rem)',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0,

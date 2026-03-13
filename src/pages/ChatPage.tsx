@@ -87,11 +87,11 @@ export default function ChatPage() {
         background: '#0D0B09', borderBottom: '1px solid #2A2018',
       }}>
         <div style={{ height: '4px', background: '#D42B1E' }} />
-        <div style={{
+        <div className="header-inner" style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '18px clamp(1.5rem, 6vw, 5rem)',
         }}>
-          <h1 style={{
+          <h1 className="header-title" style={{
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(1.6rem, 3.5vw, 2.8rem)',
             letterSpacing: '0.04em', color: '#F0EBE3', lineHeight: 1,
@@ -110,9 +110,9 @@ export default function ChatPage() {
       {/* ── MESSAGES ── */}
       <div
         ref={messagesContainerRef}
-        style={{ flex: 1, overflowY: 'auto', paddingTop: '100px', paddingBottom: '160px' }}
+        style={{ flex: 1, overflowY: 'auto', paddingTop: '96px', paddingBottom: '160px' }}
       >
-        <div style={{ maxWidth: '860px', margin: '0 auto', padding: '0 clamp(1.5rem, 6vw, 5rem)' }}>
+        <div className="messages-padding" style={{ maxWidth: '860px', margin: '0 auto', padding: '0 clamp(1.5rem, 6vw, 5rem)' }}>
           {messages.length === 0 ? (
             <p style={{ color: '#7A7470', fontSize: '14px', letterSpacing: '0.02em', margin: 0 }}>
               &gt;&gt; start a conversation below...
@@ -121,7 +121,7 @@ export default function ChatPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               {messages.map((msg, idx) => (
                 <div key={idx} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-                  <div style={{
+                  <div className="msg-bubble" style={{
                     maxWidth: '72%', paddingLeft: '14px',
                     borderLeft: `3px solid ${msg.role === 'user' ? '#D42B1E' : '#2A2018'}`,
                   }}>
@@ -145,7 +145,7 @@ export default function ChatPage() {
       </div>
 
       {/* ── INPUT BAR ── */}
-      <div style={{
+      <div className="chat-input-bar" style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 10,
         background: '#0D0B09', borderTop: '1px solid #2A2018',
         padding: '16px clamp(1.5rem, 6vw, 5rem)',
@@ -173,6 +173,7 @@ export default function ChatPage() {
           </div>
           <button
             type="button"
+            className="chat-send-btn"
             onClick={handleSubmit}
             disabled={isLoading || !inputValue.trim()}
             style={{
