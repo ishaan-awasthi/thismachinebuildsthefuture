@@ -16,218 +16,159 @@ export default function TimelinePage() {
   const timelineRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    const h = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', h)
+    return () => window.removeEventListener('resize', h)
   }, [])
 
-  useEffect(() => {
-    loadSubmissions()
-  }, [])
+  useEffect(() => { loadSubmissions() }, [])
 
   useEffect(() => {
-    // Intersection Observer for fade-in on scroll
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const index = parseInt(entry.target.getAttribute('data-index') || '0')
-            setVisibleIndices((prev) => new Set([...prev, index]))
-          }
-        })
-      },
+      entries => entries.forEach(e => {
+        if (e.isIntersecting) {
+          const idx = parseInt(e.target.getAttribute('data-index') || '0')
+          setVisibleIndices(prev => new Set([...prev, idx]))
+        }
+      }),
       { threshold: 0.1 }
     )
-
-    const elements = document.querySelectorAll('[data-contribution]')
-    elements.forEach((el) => observer.observe(el))
-
-    return () => {
-      elements.forEach((el) => observer.unobserve(el))
-    }
+    const els = document.querySelectorAll('[data-contribution]')
+    els.forEach(el => observer.observe(el))
+    return () => els.forEach(el => observer.unobserve(el))
   }, [submissions])
 
   const loadSubmissions = async () => {
     try {
       setIsLoading(true)
       const { data, error } = await supabase
-        .from('submissions')
-        .select('*')
-        .order('created_at', { ascending: true })
-
-      if (error) {
-        console.error('Error loading submissions:', error)
-        return
-      }
-
+        .from('submissions').select('*').order('created_at', { ascending: true })
+      if (error) { console.error(error); return }
       setSubmissions(data || [])
-      
-      // Stagger animation - reveal items one by one
-      if (data && data.length > 0) {
-        data.forEach((_, index) => {
-          setTimeout(() => {
-            setVisibleIndices((prev) => new Set([...prev, index]))
-          }, index * 100)
-        })
-      }
-    } catch (error) {
-      console.error('Error loading submissions:', error)
-    } finally {
-      setIsLoading(false)
-    }
+      if (data?.length) data.forEach((_, i) => setTimeout(() => setVisibleIndices(p => new Set([...p, i])), i * 100))
+    } catch (e) { console.error(e) }
+    finally { setIsLoading(false) }
   }
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
+  const formatDate = (d: string) => new Date(d).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  })
 
-  const getRandomRotation = (index: number) => {
-    // Use index as seed for consistent rotation per item
-    const seed = index * 7
-    return ((seed % 3) - 1) // Returns -1, 0, or 1
-  }
+  const getRot = (i: number) => ((i * 7) % 3) - 1
 
   return (
-    <div className="min-h-screen bg-base-bg flex flex-col overflow-x-hidden">
-      {/* Fixed header */}
-      <header className="fixed top-0 left-0 right-0 h-20 flex items-center justify-between px-5 md:px-10 z-10 border-b border-border" style={{ backgroundColor: '#0A0A0A' }}>
-        <h1 className="text-headline text-2xl md:text-3xl text-base-text">
-          THIS MACHINE BUILDS THE FUTURE
-        </h1>
-        <Link
-          to="/"
-          className="text-primary-text hover:text-cyan hover:underline transition-all duration-200 text-sm md:text-base"
-          style={{ textDecoration: 'none' }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderBottom = '2px solid #00F0FF'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderBottom = 'none'
-          }}
-        >
-          &gt;&gt; return home
-        </Link>
+    <div style={{ minHeight: '100vh', background: '#0D0B09', display: 'flex', flexDirection: 'column', overflowX: 'hidden' }}>
+
+      {/* ── HEADER ── */}
+      <header style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 10,
+        background: '#0D0B09', borderBottom: '1px solid #2A2018',
+      }}>
+        <div style={{ height: '4px', background: '#D42B1E' }} />
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '18px clamp(1.5rem, 6vw, 5rem)',
+        }}>
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(1.6rem, 3.5vw, 2.8rem)',
+            letterSpacing: '0.04em', color: '#F0EBE3', lineHeight: 1,
+            textTransform: 'uppercase', margin: 0,
+          }}>
+            THIS MACHINE BUILDS THE FUTURE
+          </h1>
+          <Link to="/"
+            style={{ color: '#7A7470', textDecoration: 'none', fontSize: '13px', letterSpacing: '0.04em', fontFamily: 'var(--font-mono)', flexShrink: 0, marginLeft: '24px', transition: 'color 0.15s' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#F0EBE3'; e.currentTarget.style.borderBottom = '1px solid #D42B1E' }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#7A7470'; e.currentTarget.style.borderBottom = 'none' }}
+          >&gt;&gt; return home</Link>
+        </div>
       </header>
 
-      {/* Timeline container - full width */}
-      <div className="flex-1 pt-20 w-full" ref={timelineRef}>
+      {/* ── TIMELINE ── */}
+      <div style={{ flex: 1, paddingTop: '96px' }} ref={timelineRef}>
         {isLoading ? (
-          <div className="flex items-center justify-center h-screen">
-            <p className="text-secondary-text">loading timeline...</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
+            <p style={{ color: '#7A7470', fontSize: '14px', letterSpacing: '0.04em' }}>loading timeline...</p>
           </div>
         ) : submissions.length === 0 ? (
-          <div className="flex items-center justify-center h-screen">
-            <p className="text-secondary-text">no submissions yet.</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
+            <p style={{ color: '#7A7470', fontSize: '14px', letterSpacing: '0.04em' }}>no submissions yet.</p>
           </div>
         ) : (
-          <div className="relative w-full py-10 pb-20">
-            {/* Vertical cyan timeline line - centered on desktop, 40px from left on mobile */}
-            <div 
-              className="absolute top-0 bottom-0 left-[40px] md:left-1/2 md:-translate-x-1/2"
-              style={{
-                width: '2px',
-                background: '#00F0FF',
-              }}
-            />
+          <div style={{ position: 'relative', width: '100%', padding: '40px 0 80px' }}>
 
-            {/* Timeline items */}
-            <div>
-              {submissions.map((submission, index) => {
-                // On mobile, all items on left. On desktop, alternate left/right
-                const isLeft = isMobile ? true : index % 2 === 0
-                const isVisible = visibleIndices.has(index)
-                const rotation = getRandomRotation(index)
-                
-                return (
+            {/* Spine */}
+            <div style={{
+              position: 'absolute', top: 0, bottom: 0,
+              left: isMobile ? '40px' : '50%',
+              transform: isMobile ? 'none' : 'translateX(-50%)',
+              width: '3px', background: '#D42B1E',
+            }} />
+
+            {submissions.map((sub, i) => {
+              const isLeft = isMobile ? true : i % 2 === 0
+              const isVisible = visibleIndices.has(i)
+              const rot = getRot(i)
+
+              return (
+                <div
+                  key={sub.id || i}
+                  data-contribution
+                  data-index={i}
+                  style={{
+                    position: 'relative', marginBottom: '64px',
+                    opacity: isVisible ? 1 : 0,
+                    transition: 'opacity 0.3s ease-in, transform 0.3s ease-out',
+                    transform: isVisible
+                      ? `translateX(0) rotate(${rot}deg)`
+                      : `translateX(${isLeft ? '-20px' : '20px'}) rotate(${rot}deg)`,
+                  }}
+                >
+                  {/* Dot */}
+                  <div style={{
+                    position: 'absolute',
+                    left: isMobile ? '33px' : '50%',
+                    top: '20px',
+                    transform: isMobile ? 'none' : 'translateX(-50%)',
+                    width: '10px', height: '10px',
+                    background: '#D42B1E', borderRadius: '50%',
+                  }} />
+
+                  {/* Card */}
                   <div
-                    key={submission.id || index}
-                    data-contribution
-                    data-index={index}
-                    className="relative mb-16"
                     style={{
-                      opacity: isVisible ? 1 : 0,
-                      transition: 'opacity 0.3s ease-in',
-                      transform: isVisible 
-                        ? `translateX(0) rotate(${rotation}deg)` 
-                        : `translateX(${isLeft ? '-20px' : '20px'}) rotate(${rotation}deg)`,
+                      marginLeft: isLeft ? '60px' : 'auto',
+                      marginRight: isLeft ? 'auto' : '60px',
+                      maxWidth: '360px',
+                      border: '1px solid #2A2018',
+                      padding: '16px 18px',
+                      background: 'transparent',
+                      transform: `rotate(${rot}deg)`,
+                      transition: 'border-color 0.15s',
+                      cursor: 'default',
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.borderColor = '#D42B1E'
+                      const p = e.currentTarget.querySelector('p')
+                      if (p) p.style.color = '#D42B1E'
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.borderColor = '#2A2018'
+                      const p = e.currentTarget.querySelector('p')
+                      if (p) p.style.color = '#F0EBE3'
                     }}
                   >
-                    {/* Cyan dot connecting to timeline - hidden */}
-                    <div
-                      className="absolute rounded-full bg-cyan transition-all duration-200 md:left-1/2 md:-translate-x-1/2"
-                      style={{
-                        display: 'none',
-                        left: '32px',
-                        top: '20px',
-                        width: '8px',
-                        height: '8px',
-                      }}
-                    />
-
-                    {/* Contribution box */}
-                    <div
-                      className="border border-secondary-text p-5 max-w-[400px] transition-all duration-200 hover:border-cyan group"
-                      style={{
-                        marginLeft: isLeft ? '60px' : 'auto',
-                        marginRight: isLeft ? 'auto' : '60px',
-                        background: 'transparent',
-                        transform: `rotate(${rotation}deg)`,
-                      }}
-                      onMouseEnter={(e) => {
-                        const dot = e.currentTarget.previousElementSibling as HTMLElement
-                        if (dot) {
-                          dot.style.width = '12px'
-                          dot.style.height = '12px'
-                          dot.style.left = '30px'
-                          dot.style.top = '18px'
-                        }
-                        e.currentTarget.style.borderColor = '#00F0FF'
-                        const text = e.currentTarget.querySelector('p')
-                        if (text) text.style.color = '#00F0FF'
-                      }}
-                      onMouseLeave={(e) => {
-                        const dot = e.currentTarget.previousElementSibling as HTMLElement
-                        if (dot) {
-                          dot.style.width = '8px'
-                          dot.style.height = '8px'
-                          dot.style.left = '32px'
-                          dot.style.top = '20px'
-                        }
-                        e.currentTarget.style.borderColor = '#808080'
-                        const text = e.currentTarget.querySelector('p')
-                        if (text) text.style.color = '#E8E8E8'
-                      }}
-                    >
-                      {/* Timestamp */}
-                      <div className="text-secondary-text mb-2" style={{ fontSize: '12px' }}>
-                        {submission.created_at ? formatDate(submission.created_at) : 'Unknown date'}
-                      </div>
-                      
-                      {/* Contribution text */}
-                      <p 
-                        className="text-base-text transition-colors duration-200"
-                        style={{ 
-                          fontSize: '16px',
-                          lineHeight: '1.6',
-                          color: '#E8E8E8'
-                        }}
-                      >
-                        {submission.idea}
-                      </p>
+                    <div style={{ color: '#7A7470', fontSize: '11px', letterSpacing: '0.04em', marginBottom: '8px' }}>
+                      {sub.created_at ? formatDate(sub.created_at) : 'Unknown date'}
                     </div>
+                    <p style={{ color: '#F0EBE3', fontSize: '15px', lineHeight: '1.6', margin: 0, transition: 'color 0.15s' }}>
+                      {sub.idea}
+                    </p>
                   </div>
-                )
-              })}
-            </div>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>

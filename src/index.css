@@ -1,64 +1,88 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: #0D0B09;
+  --text: #F0EBE3;
+  --text-dim: #7A7470;
+  --accent: #D42B1E;
+  --accent-bright: #FF3D2E;
+  --accent-glow: rgba(212, 43, 30, 0.35);
+  --border: #2A2018;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
 @layer base {
   * {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
   }
-  
+
   body {
-    @apply bg-[#0A0A0A] text-[#E8E8E8];
+    @apply bg-[#0D0B09] text-[#F0EBE3];
     font-size: 16px;
     line-height: 1.6;
     font-weight: 400;
   }
-  
-  ::selection {
-    background-color: rgba(0, 240, 255, 0.3);
-    color: #E8E8E8;
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
   }
-  
+
+  ::selection {
+    background-color: rgba(212, 43, 30, 0.3);
+    color: #F0EBE3;
+  }
+
   ::-webkit-scrollbar {
     width: 8px;
   }
-  
+
   ::-webkit-scrollbar-track {
-    background: #0A0A0A;
+    background: #0D0B09;
   }
-  
+
   ::-webkit-scrollbar-thumb {
-    background: #1A1A1A;
+    background: #2A2018;
     border-radius: 4px;
   }
-  
+
   ::-webkit-scrollbar-thumb:hover {
-    background: #00F0FF;
+    background: #D42B1E;
   }
 }
 
 @layer utilities {
   .text-headline {
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 800;
+    font-family: var(--font-display);
+    font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     line-height: 0.95;
   }
-  
+
   .text-subheading {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: var(--font-mono);
     font-weight: 600;
     text-transform: lowercase;
   }
-  
-  .glow-cyan {
-    box-shadow: 0 0 4px #00F0FF;
+
+  .glow-red {
+    box-shadow: 0 0 4px #D42B1E;
   }
-  
-  .glow-cyan-strong {
-    box-shadow: 0 0 8px #00F0FF;
+
+  .glow-red-strong {
+    box-shadow: 0 0 8px #D42B1E;
   }
 }
